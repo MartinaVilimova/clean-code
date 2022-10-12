@@ -22,55 +22,43 @@ class DecimalNumberMatcher {
   }
 
   match(value) {
-    let result = new ValidationResult();
+    if (value === null) return new ValidationResult();
 
-    if (value != null) {
-      if (this.params.length === 0) {
-        let number;
-        try {
-          number = new Decimal(value);
-        } catch (e) {
-          number = null;
-          result.addInvalidTypeError("doubleNumber.e001", "The value is not a valid decimal number.");
-        }
-        if (number) {
-          if (number.precision(true) > 11) {
-            result.addInvalidTypeError("doubleNumber.e002", "The value exceeded maximum number of digits.");
-          }
-        }
-      } else if (this.params.length === 1) {
-        let number;
-        try {
-          number = new Decimal(value);
-        } catch (e) {
-          number = null;
-          result.addInvalidTypeError("doubleNumber.e001", "The value is not a valid decimal number.");
-        }
-        if (number) {
-          if (number.precision(true) > this.params[0]) {
-            result.addInvalidTypeError("doubleNumber.e002", "The value exceeded maximum number of digits.");
-          }
-        }
-      } else if (this.params.length === 2) {
-        let number;
-        try {
-          number = new Decimal(value);
-        } catch (e) {
-          number = null;
-          result.addInvalidTypeError("doubleNumber.e001", "The value is not a valid decimal number.");
-        }
-        if (number) {
-          if (number.precision(true) > this.params[0]) {
-            result.addInvalidTypeError("doubleNumber.e002", "The value exceeded maximum number of digits.");
-          }
-          if (number.decimalPlaces() > this.params[1]) {
-            result.addInvalidTypeError("doubleNumber.e003", "The value exceeded maximum number of decimal places.");
-          }
-        }
-      }
+    const { number, validationResult } = this.isValidDecimal(value, new ValidationResult());
+
+    if (!number) return validationResult;
+
+    if (this.params.length === 0 && this.isExceededMaximumNumberOfDigits(number, 11))
+      validationResult.addInvalidTypeError("doubleNumber.e002", "The value exceeded maximum number of digits.");
+
+    if (this.params.length === 1 && this.isExceededMaximumNumberOfDigits(number, this.params[0]))
+      validationResult.addInvalidTypeError("doubleNumber.e002", "The value exceeded maximum number of digits.");
+
+    if (this.params.length === 2 && this.isExceededMaximumNumberOfDigits(number, this.params[0]))
+      validationResult.addInvalidTypeError("doubleNumber.e002", "The value exceeded maximum number of digits.");
+
+    if (this.params.length === 2 && this.isDecimalPlaces(number))
+      validationResult.addInvalidTypeError("doubleNumber.e003", "The value exceeded maximum number of decimal places.");
+
+    return validationResult;
+  }
+
+  isExceededMaximumNumberOfDigits(number, maximumNumberDIgits) {
+    return number.precision(true) > maximumNumberDIgits;
+  }
+
+  isDecimalPlaces(number) {
+    return number.decimalPlaces() > this.params[1];
+  }
+
+  isValidDecimal(value, validationResult) {
+    try {
+      return { number: new Decimal(value), validationResult };
+    } catch (e) {
+      validationResult.addInvalidTypeError("doubleNumber.e001", "The value is not a valid decimal number.");
+
+      return { number: null, validationResult };
     }
-
-    return result;
   }
 }
 
