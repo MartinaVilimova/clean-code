@@ -1,7 +1,7 @@
 // noinspection JSUnusedGlobalSymbols
 
 const Decimal = require("decimal.js");
-const ValidationResult = require("./validation-result");
+const ValidationResult = require("../validation-result");
 
 /**
  * Matcher validates that string value represents a decimal number or null.
