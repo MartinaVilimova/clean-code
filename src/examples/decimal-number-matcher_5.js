@@ -16,6 +16,7 @@ const ValidationResult = require("./validation-result");
  *   -- the second parameter represents the maximum number of decimal places.
  *   -- both conditions must be met in this case.
  */
+
 class DecimalNumberMatcher {
   constructor(...params) {
     this.params = params;
@@ -28,17 +29,13 @@ class DecimalNumberMatcher {
 
     if (!number) return validationResult;
 
-    if (this.params.length === 0 && this.isExceededMaxDigits(number, 11))
-      validationResult.addInvalidTypeError("doubleNumber.e002", "The value exceeded maximum number of digits.");
+    if (this.params.length === 0 && this.isExceededMaxDigits(number, 11)) validationResult = this.getError("e002", validationResult);
 
-    if (this.params.length === 1 && this.isExceededMaxDigits(number, this.params[0]))
-      validationResult.addInvalidTypeError("doubleNumber.e002", "The value exceeded maximum number of digits.");
+    if (this.params.length === 1 && this.isExceededMaxDigits(number, this.params[0])) validationResult = this.getError("e002", validationResult);
 
-    if (this.params.length === 2 && this.isExceededMaxDigits(number, this.params[0]))
-      validationResult.addInvalidTypeError("doubleNumber.e002", "The value exceeded maximum number of digits.");
+    if (this.params.length === 2 && this.isExceededMaxDigits(number, this.params[0])) validationResult = this.getError("e002", validationResult);
 
-    if (this.params.length === 2 && this.isExceededMaxDecimalPlace(number))
-      validationResult.addInvalidTypeError("doubleNumber.e003", "The value exceeded maximum number of decimal places.");
+    if (this.params.length === 2 && this.isExceededMaxDecimalPlace(number)) validationResult = this.getError("e003", validationResult);
 
     return validationResult;
   }
@@ -55,10 +52,27 @@ class DecimalNumberMatcher {
     try {
       return { number: new Decimal(value), validationResult };
     } catch (e) {
-      validationResult.addInvalidTypeError("doubleNumber.e001", "The value is not a valid decimal number.");
-
+      validationResult = this.getError("e001", validationResult);
       return { number: null, validationResult };
     }
+  }
+
+  getError(doubleNumber, validationResult) {
+    switch (doubleNumber) {
+      case "e001": {
+        validationResult.addInvalidTypeError("doubleNumber.e001", "The value is not a valid decimal number.");
+        break;
+      }
+      case "e002": {
+        validationResult.addInvalidTypeError("doubleNumber.e002", "The value exceeded maximum number of digits.");
+        break;
+      }
+      case "003": {
+        validationResult.addInvalidTypeError("doubleNumber.e003", "The value exceeded maximum number of decimal places.");
+        break;
+      }
+    }
+    return validationResult;
   }
 }
 
